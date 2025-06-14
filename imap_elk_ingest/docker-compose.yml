@@ -1,0 +1,28 @@
+version: '3.9'
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms8g -Xmx8g
+      - xpack.security.enabled=false
+    volumes:
+      - /data_ssd_nvme2/es:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.12.2
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+
+  logstash:
+    build: ./extensions/logstash
+    environment:
+      - LS_JAVA_OPTS=-Xms2g -Xmx2g
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
+    depends_on:
+      - elasticsearch
